@@ -1,0 +1,62 @@
+<!-- templates/base.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>{% block title %}Strain Match{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* Tiny MVP styles (optional) */
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; }
+    header, footer { padding: 12px 16px; background: #111; color: #eee; }
+    nav a { color: #eee; text-decoration: none; margin-right: 12px; }
+    nav a.active { text-decoration: underline; }
+    main { padding: 16px; }
+    .btn { padding: 8px 12px; border: 1px solid #333; border-radius: 6px; text-decoration: none; display: inline-block; }
+    .btn-primary { background: #2563eb; color: #fff; border-color: #2563eb; }
+    .flash { padding: 10px 12px; border-radius: 6px; margin: 10px 0; }
+    .flash.success { background: #e6ffed; border: 1px solid #22c55e; }
+    .flash.info { background: #eff6ff; border: 1px solid #3b82f6; }
+    .flash.warning { background: #fff7ed; border: 1px solid #f59e0b; }
+    .flash.error { background: #fef2f2; border: 1px solid #ef4444; }
+    form { display: grid; gap: 10px; max-width: 540px; }
+    label { display: grid; gap: 6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="{% url 'strain_match:home' %}">Home</a>
+      <a href="{% url 'strain_match:about' %}">About</a>
+      <a href="{% url 'strain_match:faqs' %}">FAQs</a>
+      <a href="{% url 'strain_match:myprofile' %}">MyProfile</a>
+      <span style="float:right;">
+        {% if user.is_authenticated %}
+          <form method="post" action="{% url 'users:logout' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn">Log Out</button>
+          </form>
+        {% else %}
+          <a href="{% url 'users:login' %}" class="btn">Log In</a>
+          <a href="{% url 'users:signup' %}" class="btn btn-primary">Sign Up</a>
+        {% endif %}
+      </span>
+    </nav>
+  </header>
+
+  <main>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="flash {{ message.tags|default:'' }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <small>© {{ now|date:"Y" }} Strain Match</small>
+  </footer>
+</body>
+</html>

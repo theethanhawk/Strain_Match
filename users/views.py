@@ -14,7 +14,7 @@ def landing(request):
     """
     if request.user.is_authenticated:
         # TODO: After the strain_match app exists, change this to its home route.
-        return redirect("users:post_login")
+        return redirect("strain_match:home")
     return render(request, "users/landing.html")
 
 

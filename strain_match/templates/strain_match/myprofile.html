@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}My Profile — Strain Match{% endblock %}
+{% block content %}
+  <h2>My Profile</h2>
+
+  {% if user.is_authenticated %}
+    <div style="max-width:600px;">
+      <p><strong>Username:</strong> {{ user.username }}</p>
+      <p><strong>Email:</strong> {{ user.email }}</p>
+      <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+      {% if user.bio %}
+        <p><strong>Bio:</strong> {{ user.bio }}</p>
+      {% endif %}
+
+      <hr>
+      <h3>Survey Status</h3>
+      {% if user.survey %}
+        <p>Your initial survey is on file. ✅</p>
+        <ul>
+          <li><strong>Goal:</strong> {{ user.survey.get_goal_display }}</li>
+          <li><strong>Experience:</strong> {{ user.survey.get_experience_level_display }}</li>
+          <li><strong>Tolerance:</strong> {{ user.survey.tolerance }}</li>
+          <li><strong>Preferred time:</strong> {{ user.survey.get_preferred_time_display }}</li>
+          {% if user.survey.notes %}<li><strong>Notes:</strong> {{ user.survey.notes }}</li>{% endif %}
+          <li><small>Last updated: {{ user.survey.updated_at|date:"Y-m-d H:i" }}</small></li>
+        </ul>
+      {% else %}
+        <p>No survey found. <a href="{% url 'strain_match:survey' %}">Take the survey</a> to personalize your experience.</p>
+      {% endif %}
+    </div>
+  {% else %}
+    <p>Please <a href="{% url 'users:login' %}">log in</a> to view your profile.</p>
+  {% endif %}
+{% endblock %}

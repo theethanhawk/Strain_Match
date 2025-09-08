@@ -22,7 +22,7 @@
     <header>
       <h1>Strain Match</h1>
       <nav>
-        <a href="{% url 'users:landing' %}">Landing</a>
+        <a href="{% url 'users:landing' %}">Welcome</a>
         {% if user.is_authenticated %}
           <a href="{% url 'users:post_login' %}">After Login</a>
           <form style="display:inline" action="{% url 'users:logout' %}" method="post">

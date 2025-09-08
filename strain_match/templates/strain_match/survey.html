@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Initial Survey — Strain Match{% endblock %}
+{% block content %}
+  <h2>Initial Survey</h2>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="flash error">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <label>{{ form.goal.label }} {{ form.goal }}</label>
+    <label>{{ form.experience_level.label }} {{ form.experience_level }}</label>
+    <label>{{ form.tolerance.label }} {{ form.tolerance }}</label>
+    <label>{{ form.preferred_time.label }} {{ form.preferred_time }}</label>
+    <label>{{ form.notes.label }} {{ form.notes }}</label>
+
+    <details>
+      <summary>Advanced: Extra preferences (JSON)</summary>
+      <div style="margin-top:8px;">
+        {{ form.extra.errors }}
+        {{ form.extra }}
+        <small>{{ form.extra.help_text }}</small>
+      </div>
+    </details>
+
+    <button class="btn btn-primary" type="submit">Save & Continue</button>
+  </form>
+{% endblock %}
