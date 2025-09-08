@@ -1,0 +1,17 @@
+{% extends "users/base.html" %}
+{% block title %}Sign Up — Strain Match{% endblock %}
+{% block content %}
+  <h2>Create your account</h2>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <label>Email {{ form.email }}</label>
+    <label>Username {{ form.username }}</label>
+    <label>First name {{ form.first_name }}</label>
+    <label>Last name {{ form.last_name }}</label>
+    <label>Bio {{ form.bio }}</label>
+    <label>Password {{ form.password1 }}</label>
+    <label>Confirm Password {{ form.password2 }}</label>
+    <button class="btn btn-primary" type="submit">Sign Up</button>
+  </form>
+  <p>Already have an account? <a href="{% url 'users:login' %}">Log in</a>.</p>
+{% endblock %}

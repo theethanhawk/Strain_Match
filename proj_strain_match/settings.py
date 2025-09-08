@@ -44,6 +44,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
+# Tell Django to use the custom user
+AUTH_USER_MODEL = "users.CustomUser"
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -63,6 +66,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                "django.template.context_processors.debug",
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -70,6 +74,12 @@ TEMPLATES = [
         },
     },
 ]
+
+# Auth redirects
+# update: change to "strain_match:home" later
+LOGIN_URL = "users:login"
+LOGIN_REDIRECT_URL = "users:post_login"
+LOGOUT_REDIRECT_URL = "users:landing"
 
 WSGI_APPLICATION = 'proj_strain_match.wsgi.application'
 

@@ -1,0 +1,10 @@
+{% extends "users/base.html" %}
+{% block title %}Welcome — Strain Match{% endblock %}
+{% block content %}
+  <h2>Welcome</h2>
+  <p>Find your match. Create an account or log in to get started.</p>
+  <p>
+    <a class="btn btn-primary" href="{% url 'users:signup' %}">Create Account</a>
+    <a class="btn" href="{% url 'users:login' %}">Log In</a>
+  </p>
+{% endblock %}

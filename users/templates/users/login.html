@@ -1,0 +1,12 @@
+{% extends "users/base.html" %}
+{% block title %}Log In — Strain Match{% endblock %}
+{% block content %}
+  <h2>Log In</h2>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <label>{{ form.username.label }} {{ form.username }}</label>
+    <label>Password {{ form.password }}</label>
+    <button class="btn btn-primary" type="submit">Log In</button>
+  </form>
+  <p>New here? <a href="{% url 'users:signup' %}">Create an account</a>.</p>
+{% endblock %}
