@@ -2,249 +2,240 @@
 {% block title %}Initial Survey — Strain Match{% endblock %}
 
 {% block content %}
-<h2>Initial Survey</h2>
+  <div class="stack-lg">
+    <div class="stack">
+      <h2>Initial Survey</h2>
 
-<!-- Progress -->
-<div id="progress" style="height:10px;background:#eee;border-radius:6px;overflow:hidden;margin:12px 0 20px;">
-  <div id="progress-bar" style="height:100%;width:0%;background:#2563eb;transition:width .25s;"></div>
-</div>
-<p id="progress-text" style="margin:0 0 16px 0;"></p>
+      <!-- Progress -->
+      <div class="progress"><div id="progress-bar" class="bar"></div></div>
+      <p id="progress-text" class="mt-2"></p>
+    </div>
 
-<!-- Wizard container -->
-<div id="wizard"></div>
+    <!-- Wizard container -->
+    <div id="wizard" class="card"></div>
 
-<!-- Controls -->
-<div style="display:flex;gap:12px;margin-top:16px;">
-  <button id="prevBtn" class="btn" type="button">Previous</button>
-  <button id="nextBtn" class="btn btn-primary" type="button" disabled>Next</button>
-</div>
+    <!-- Controls -->
+    <div class="stack-sm" style="grid-auto-flow: column; justify-content: start;">
+      <button id="prevBtn" class="btn" type="button">Previous</button>
+      <button id="nextBtn" class="btn btn-primary" type="button" disabled>Next</button>
+    </div>
+  </div>
 
-<!-- Hidden Django form to submit answers (q__slug) to backend for validation/save -->
-<form id="surveyForm" method="post" style="display:none;">
-  {% csrf_token %}
-</form>
+  <!-- Hidden Django form to submit answers (q__slug) to backend for validation/save -->
+  <form id="surveyForm" method="post" style="display:none;">
+    {% csrf_token %}
+  </form>
 
-{# Safely embed JSON schema. This outputs a <script id="survey-schema" type="application/json">...</script> #}
-{{ schema|json_script:"survey-schema" }}
+  {# Safely embed JSON schema #}
+  {{ schema|json_script:"survey-schema" }}
 
-<script>
-(function () {
-  const schemaEl = document.getElementById('survey-schema');
-  let SCHEMA = [];
-  try {
-    SCHEMA = JSON.parse(schemaEl.textContent);
-  } catch (e) {
-    console.error("Failed to parse schema JSON:", e);
-    document.getElementById('wizard').innerHTML = "<p class='flash error'>Unable to load survey. Please refresh.</p>";
-    return;
-  }
-
-  if (!Array.isArray(SCHEMA) || SCHEMA.length === 0) {
-    document.getElementById('wizard').innerHTML = "<p class='flash error'>No survey questions found.</p>";
-    return;
-  }
-
-  // Wizard state
-  let index = 0;
-  const answers = {}; // slug -> value (string) or array (multi)
-
-  // Elements
-  const container = document.getElementById('wizard');
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
-  const bar = document.getElementById('progress-bar');
-  const progressText = document.getElementById('progress-text');
-
-  function updateProgress() {
-    const pct = Math.round(((index) / SCHEMA.length) * 100);
-    bar.style.width = Math.max(5, pct) + '%';
-    progressText.textContent = `Question ${index + 1} of ${SCHEMA.length}`;
-  }
-
-  function renderQuestion() {
-    const q = SCHEMA[index];
-    container.innerHTML = '';
-
-    const wrap = document.createElement('div');
-
-    const label = document.createElement('h3');
-    label.textContent = q.label;
-    wrap.appendChild(label);
-
-    if (q.help) {
-      const help = document.createElement('p');
-      help.style.marginTop = '0';
-      help.innerText = q.help;
-      wrap.appendChild(help);
+  <script>
+  (function () {
+    const schemaEl = document.getElementById('survey-schema');
+    let SCHEMA = [];
+    try {
+      SCHEMA = JSON.parse(schemaEl.textContent);
+    } catch (e) {
+      console.error("Failed to parse schema JSON:", e);
+      document.getElementById('wizard').innerHTML = "<div class='flash error'>Unable to load survey. Please refresh.</div>";
+      return;
+    }
+    if (!Array.isArray(SCHEMA) || SCHEMA.length === 0) {
+      document.getElementById('wizard').innerHTML = "<div class='flash error'>No survey questions found.</div>";
+      return;
     }
 
-    // Build options: for int with min/max, produce 1..10 etc.
-    let opts = [];
-    if (q.type === 'int' && q.min !== undefined && q.max !== undefined) {
-      opts = Array.from({length: q.max - q.min + 1}, (_, i) => {
-        const val = String(q.min + i);
-        return [val, val];
-      });
-    } else if (q.choices) {
-      // q.choices is [[value, label], ...]
-      opts = q.choices;
+    // State
+    let index = 0;
+    const answers = {}; // slug -> value or array
+
+    // Elements
+    const container = document.getElementById('wizard');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const bar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+
+    function updateProgress() {
+      const pct = Math.round(((index) / SCHEMA.length) * 100);
+      bar.style.width = Math.max(5, pct) + '%';
+      progressText.textContent = `Question ${index + 1} of ${SCHEMA.length}`;
     }
 
-    const list = document.createElement('div');
-    list.style.display = 'grid';
-    list.style.gap = '8px';
+    function renderQuestion() {
+      const q = SCHEMA[index];
+      container.innerHTML = '';
 
-    const current = answers[q.slug];
+      const wrap = document.createElement('div');
+      wrap.className = 'stack';
 
-    // Render all as checkboxes; enforce single-selection for 'choice'/'int'
-    opts.forEach(([value, text]) => {
-      const id = `opt_${q.slug}_${value}`;
-      const row = document.createElement('label');
-      row.style.display = 'flex';
-      row.style.alignItems = 'center';
-      row.style.gap = '10px';
+      const label = document.createElement('h3');
+      label.textContent = q.label;
+      wrap.appendChild(label);
 
-      const cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.name = q.slug;
-      cb.value = value;
-      cb.id = id;
-
-      if (q.type === 'multi') {
-        if (Array.isArray(current) && current.includes(value)) cb.checked = true;
-      } else {
-        if (current === value) cb.checked = true;
+      if (q.help) {
+        const help = document.createElement('p');
+        help.className = 'mt-2';
+        help.innerText = q.help;
+        wrap.appendChild(help);
       }
 
-      cb.addEventListener('change', () => {
+      // Build options
+      let opts = [];
+      if (q.type === 'int' && q.min !== undefined && q.max !== undefined) {
+        opts = Array.from({length: q.max - q.min + 1}, (_, i) => {
+          const val = String(q.min + i);
+          return [val, val];
+        });
+      } else if (q.choices) {
+        opts = q.choices;
+      }
+
+      const list = document.createElement('div');
+      list.className = 'choice-list';
+
+      const current = answers[q.slug];
+
+      opts.forEach(([value, text]) => {
+        const id = `opt_${q.slug}_${value}`;
+
+        const row = document.createElement('label');
+        row.className = 'choice';
+        row.setAttribute('for', id);
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.name = q.slug;
+        cb.value = value;
+        cb.id = id;
+
         if (q.type === 'multi') {
-          const arr = Array.isArray(answers[q.slug]) ? answers[q.slug].slice() : [];
-          if (cb.checked) {
-            if (!arr.includes(value)) arr.push(value);
-          } else {
-            const i = arr.indexOf(value);
-            if (i >= 0) arr.splice(i, 1);
-          }
-          // Enforce 1..3 for desired_effects
-          if (q.slug === 'desired_effects' && arr.length > 3) {
-            cb.checked = false;
-            const j = arr.indexOf(value);
-            if (j >= 0) arr.splice(j, 1);
-          }
-          answers[q.slug] = arr;
-          nextBtn.disabled = !(Array.isArray(arr) && arr.length > 0);
+          if (Array.isArray(current) && current.includes(value)) cb.checked = true;
         } else {
-          // single-select: uncheck others
-          const boxes = list.querySelectorAll('input[type="checkbox"]');
-          boxes.forEach(x => { if (x !== cb) x.checked = false; });
-          answers[q.slug] = cb.checked ? value : null;
-          nextBtn.disabled = !answers[q.slug];
-          // Auto-advance
-          if (answers[q.slug]) setTimeout(goNext, 120);
+          if (current === value) cb.checked = true;
         }
+
+        cb.addEventListener('change', () => {
+          if (q.type === 'multi') {
+            const arr = Array.isArray(answers[q.slug]) ? answers[q.slug].slice() : [];
+            if (cb.checked) {
+              if (!arr.includes(value)) arr.push(value);
+            } else {
+              const i = arr.indexOf(value);
+              if (i >= 0) arr.splice(i, 1);
+            }
+            // Enforce 1..3 for desired_effects
+            if (q.slug === 'desired_effects' && arr.length > 3) {
+              cb.checked = false;
+              const j = arr.indexOf(value);
+              if (j >= 0) arr.splice(j, 1);
+            }
+            answers[q.slug] = arr;
+            nextBtn.disabled = !(Array.isArray(arr) && arr.length > 0);
+          } else {
+            // single-select: uncheck others
+            const boxes = list.querySelectorAll('input[type="checkbox"]');
+            boxes.forEach(x => { if (x !== cb) x.checked = false; });
+            answers[q.slug] = cb.checked ? value : null;
+            nextBtn.disabled = !answers[q.slug];
+            if (answers[q.slug]) setTimeout(goNext, 120);
+          }
+        });
+
+        const textNode = document.createElement('span');
+        textNode.textContent = text;
+
+        row.appendChild(cb);
+        row.appendChild(textNode);
+        list.appendChild(row);
       });
 
-      const textNode = document.createElement('span');
-      textNode.textContent = text;
+      wrap.appendChild(list);
+      container.appendChild(wrap);
 
-      row.appendChild(cb);
-      row.appendChild(textNode);
-      list.appendChild(row);
-    });
-
-    wrap.appendChild(list);
-    container.appendChild(wrap);
-
-    // Init Next disabled state
-    if (q.type === 'multi') {
-      const arr = answers[q.slug];
-      nextBtn.disabled = !(Array.isArray(arr) && arr.length > 0);
-    } else {
-      nextBtn.disabled = !answers[q.slug];
-    }
-
-    // Button visibility/text per requirements
-    if (index === 0) {
-      prevBtn.style.display = 'none';
-      nextBtn.style.display = 'inline-block';
-      nextBtn.textContent = 'Next';
-    } else if (index === SCHEMA.length - 1) {
-      prevBtn.style.display = 'inline-block';
-      nextBtn.style.display = 'inline-block';
-      nextBtn.textContent = 'Complete survey';
-    } else {
-      prevBtn.style.display = 'inline-block';
-      nextBtn.style.display = 'inline-block';
-      nextBtn.textContent = 'Next';
-    }
-
-    updateProgress();
-  }
-
-  function goPrev() {
-    if (index > 0) {
-      index -= 1;
-      renderQuestion();
-    }
-  }
-
-  function goNext() {
-    // Block if unanswered
-    const q = SCHEMA[index];
-    const val = answers[q.slug];
-    if (q.type === 'multi' && (!Array.isArray(val) || val.length === 0)) return;
-    if (q.type !== 'multi' && !val) return;
-
-    if (index < SCHEMA.length - 1) {
-      index += 1;
-      renderQuestion();
-    } else {
-      submitForm();
-    }
-  }
-
-  function submitForm() {
-    // Build hidden inputs named q__<slug> and submit the real Django form
-    const form = document.getElementById('surveyForm');
-
-    // Remove old q__ inputs but keep CSRF
-    Array.from(form.querySelectorAll('input[type="hidden"]')).forEach(inp => {
-      if (inp.name !== 'csrfmiddlewaretoken') inp.remove();
-    });
-
-    SCHEMA.forEach(q => {
-      const name = `q__${q.slug}`;
-      const val = answers[q.slug];
-
+      // Initialize button states
       if (q.type === 'multi') {
-        (val || []).forEach(v => {
+        const arr = answers[q.slug];
+        nextBtn.disabled = !(Array.isArray(arr) && arr.length > 0);
+      } else {
+        nextBtn.disabled = !answers[q.slug];
+      }
+
+      if (index === 0) {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'inline-flex';
+        nextBtn.textContent = 'Next';
+      } else if (index === SCHEMA.length - 1) {
+        prevBtn.style.display = 'inline-flex';
+        nextBtn.style.display = 'inline-flex';
+        nextBtn.textContent = 'Complete survey';
+      } else {
+        prevBtn.style.display = 'inline-flex';
+        nextBtn.style.display = 'inline-flex';
+        nextBtn.textContent = 'Next';
+      }
+
+      updateProgress();
+    }
+
+    function goPrev() {
+      if (index > 0) {
+        index -= 1;
+        renderQuestion();
+      }
+    }
+
+    function goNext() {
+      const q = SCHEMA[index];
+      const val = answers[q.slug];
+      if (q.type === 'multi' && (!Array.isArray(val) || val.length === 0)) return;
+      if (q.type !== 'multi' && !val) return;
+
+      if (index < SCHEMA.length - 1) {
+        index += 1;
+        renderQuestion();
+      } else {
+        submitForm();
+      }
+    }
+
+    function submitForm() {
+      const form = document.getElementById('surveyForm');
+
+      // Remove old q__ inputs but keep CSRF
+      Array.from(form.querySelectorAll('input[type="hidden"]')).forEach(inp => {
+        if (inp.name !== 'csrfmiddlewaretoken') inp.remove();
+      });
+
+      SCHEMA.forEach(q => {
+        const name = `q__${q.slug}`;
+        const val = answers[q.slug];
+
+        if (q.type === 'multi') {
+          (val || []).forEach(v => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = v;
+            form.appendChild(input);
+          });
+        } else {
           const input = document.createElement('input');
           input.type = 'hidden';
           input.name = name;
-          input.value = v;
+          input.value = (q.type === 'int' && val != null) ? String(parseInt(val, 10)) : (val ?? '');
           form.appendChild(input);
-        });
-      } else {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = name;
-        if (q.type === 'int' && val != null) {
-          input.value = String(parseInt(val, 10));
-        } else {
-          input.value = val ?? '';
         }
-        form.appendChild(input);
-      }
-    });
+      });
 
-    form.submit();
-  }
+      form.submit();
+    }
 
-  prevBtn.addEventListener('click', goPrev);
-  nextBtn.addEventListener('click', goNext);
+    document.getElementById('prevBtn').addEventListener('click', goPrev);
+    document.getElementById('nextBtn').addEventListener('click', goNext);
 
-  // Start the wizard
-  renderQuestion();
-})();
-</script>
+    // Start
+    renderQuestion();
+  })();
+  </script>
 {% endblock %}
