@@ -28,6 +28,7 @@ media/
 # OS Files
 .DS_Store
 Thumbs.db
+.env
 
 # Additional
 adish_proj_files/
