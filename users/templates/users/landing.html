@@ -1,10 +1,114 @@
-{% extends "base.html" %}
-{% block title %}Welcome — Strain Match{% endblock %}
 {% block content %}
-  <h2>Welcome</h2>
-  <p>Find your match. Create an account or log in to get started.</p>
-  <p>
-    <a class="btn btn-primary" href="{% url 'users:signup' %}">Create Account</a>
-    <a class="btn" href="{% url 'users:login' %}">Log In</a>
-  </p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Landing Page</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    /* Banner */
+    .banner {
+      background-color: #C9A227; /* customize */
+      color: black;
+      text-align: center;
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    /* Header */
+    header {
+      background: #0B6E4F;
+      padding: 12px;
+      text-align: center;
+      font-size: 34px;
+      color: black;
+      font-weight: bold;
+      border-bottom: 1px solid black;
+      font-family: 'Playfair Display', serif;
+    }
+
+    /* Hero Section */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: white;
+      background: url("static/images/landingpage.jpg") no-repeat center center/cover;
+      position: relative;
+      height: 100vh;
+    }
+
+    /* Optional: dark overlay for text readability */
+    .hero::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 0;
+    }
+
+    .hero-text {
+      position: relative;
+      z-index: 1; /* keeps text above overlay */
+      max-width: 700px;
+      padding: 20px;
+    }
+
+    .hero-text h1 {
+      font-size: 42px;
+      margin-bottom: 20px;
+      font-family: 'Playfair Display', serif;
+    }
+
+    .hero-text p {
+      font-size: 20px;
+      margin-bottom: 20px;
+      font-family: 'Playfair Display', serif;
+    }
+
+    .hero-text a {
+      display: inline-block;
+      padding: 12px 24px;
+      background-color: #C9A227; /* customize */
+      color: #000;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+
+    .hero-text a:hover {
+      background-color: #a9861c; /* darker gold on hover */
+      color: #0B6E4F;
+    }
+  </style>
+</head>
+<body>
+  <!-- Banner -->
+  <div class="banner">
+    Sign up and get your first month FREE!
+  </div>
+
+  <!-- Header -->
+  <header>
+    STRAINMATCH
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Strains Picked For You, Delivered to You</h1>
+      <p>Receive monthly shipments with 3 grams of your preferred strains, for as little as $19.99</p>
+      <a href="/signup">Get Started</a>
+    </div>
+  </section>
+</body>
+</html>
 {% endblock %}
