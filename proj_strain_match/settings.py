@@ -78,7 +78,7 @@ TEMPLATES = [
 # Auth redirects
 # update: change to "strain_match:home" later
 LOGIN_URL = "users:login"
-LOGIN_REDIRECT_URL = "strain_match:home"
+LOGIN_REDIRECT_URL = "strain_match:myprofile"
 LOGOUT_REDIRECT_URL = "users:landing"
 
 WSGI_APPLICATION = 'proj_strain_match.wsgi.application'

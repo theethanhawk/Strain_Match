@@ -3,5 +3,17 @@
 {% block content %}
   <h2>welcome.html</h2>
   <p>To personalize your experience, please complete the quick one-time survey.</p>
-  <p><a class="btn btn-primary" href="{% url 'strain_match:survey' %}">Take the Survey</a></p>
+      {% if user.survey %}
+        <p>Your initial survey is on file. ✅</p>
+        <ul>
+          <li><strong>Goal:</strong> {{ user.survey.get_goal_display }}</li>
+          <li><strong>Experience:</strong> {{ user.survey.get_experience_level_display }}</li>
+          <li><strong>Tolerance:</strong> {{ user.survey.tolerance }}</li>
+          <li><strong>Preferred time:</strong> {{ user.survey.get_preferred_time_display }}</li>
+          {% if user.survey.notes %}<li><strong>Notes:</strong> {{ user.survey.notes }}</li>{% endif %}
+          <li><small>Last updated: {{ user.survey.updated_at|date:"Y-m-d H:i" }}</small></li>
+        </ul>
+      {% else %}
+        <p>No survey found. <a href="{% url 'strain_match:survey' %}">Take the survey</a> to personalize your experience.</p>
+      {% endif %}
 {% endblock %}

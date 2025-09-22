@@ -84,3 +84,7 @@ def faqs(request):
 def myprofile(request):
     """Basic profile view; shows survey status/details if present."""
     return render(request, "strain_match/myprofile.html")
+
+# from django.shortcuts import redirect
+
+# age_verify

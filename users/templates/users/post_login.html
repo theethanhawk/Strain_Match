@@ -2,6 +2,20 @@
 {% block title %}You're in — Strain Match{% endblock %}
 {% block content %}
 <h3>post_login.html</h3>
+<h5>I want to make this page be another instruction page</h5>
   <h2>Welcome!</h2>
   <p>You’re logged in. Once the Strain Match app is wired up, this page will redirect to its Home screen.</p>
+  {% if user.survey %}
+        <p>Your initial survey is on file. ✅</p>
+        <ul>
+          <li><strong>Goal:</strong> {{ user.survey.get_goal_display }}</li>
+          <li><strong>Experience:</strong> {{ user.survey.get_experience_level_display }}</li>
+          <li><strong>Tolerance:</strong> {{ user.survey.tolerance }}</li>
+          <li><strong>Preferred time:</strong> {{ user.survey.get_preferred_time_display }}</li>
+          {% if user.survey.notes %}<li><strong>Notes:</strong> {{ user.survey.notes }}</li>{% endif %}
+          <li><small>Last updated: {{ user.survey.updated_at|date:"Y-m-d H:i" }}</small></li>
+        </ul>
+      {% else %}
+        <p>No survey found. <a href="{% url 'strain_match:survey' %}">Take the survey</a> to personalize your experience.</p>
+      {% endif %}
 {% endblock %}
